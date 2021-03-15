@@ -20,7 +20,9 @@ void Cloth::initUvPoints() {
 	uvPoints = new double[2 * xRes * yRes];
 	for (int i = 0; i < yRes; i++) {
 		for (int j = 0; j < xRes; j++) {
+			// x
 			uvPoints[2 * (i*xRes + j)]     = j * w / (xRes-1);
+			// y
 			uvPoints[2 * (i*xRes + j) + 1] = i * h / (yRes-1);
 		}
 	}

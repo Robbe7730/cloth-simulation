@@ -21,6 +21,7 @@ void Simulation::update() {
 	for (int i = 0; i < cloth.yRes-1; i++) {
 		for (int j = 0; j < cloth.xRes-1; j++) {
 			int offset = i * cloth.xRes + j;
+			// each of these update the force field 
 			handleScaleCondition(offset);
 			handleShearCondition(offset);
 			handleBendCondition (offset);
@@ -146,8 +147,8 @@ void Simulation::scaleHelper(int *triPts, bool isBl, int y) {
 			stretchX = 0.5;
 	}
 
-	auto condX = scaleXCondition(cloth, triPts, isBl, stretchX); // Wu(x)?
-	auto condY = scaleYCondition(cloth, triPts, isBl, stretchY); // Wv(x)?
+	auto condX = scaleXCondition(cloth, triPts, isBl, stretchX); 
+	auto condY = scaleYCondition(cloth, triPts, isBl, stretchY); 
 	for (int i = 0; i < 3; i++) {
 		int ptI = triPts[i];
 
@@ -177,6 +178,12 @@ void Simulation::scaleHelper(int *triPts, bool isBl, int y) {
 }
 
 void Simulation::handleShearCondition(int offset) {
+	// botLeft = {A, B, C}
+	// topRight = {C, B, D}
+	// C - D 
+	// |\  |
+	// |  \|
+	// A - B
 	int botLeftTri[3] = {offset, offset + 1, offset + cloth.xRes};
 	int topRightTri[3] = {offset + cloth.xRes, offset + 1,
 			              offset + cloth.xRes + 1};

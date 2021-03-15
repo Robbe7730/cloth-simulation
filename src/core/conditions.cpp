@@ -6,6 +6,7 @@ Matrix2d blUvMatrixI;
 bool setTrUvMatrix = false;
 Matrix2d trUvMatrixI;
 
+// returns a 3 x 2 matrix where the first column is Wu(x) and the second column is Wv(x)
 WuvMatrix wuvMatrix(Cloth &cloth, int i, int j, int k, bool isBl) {
 	// get delta x_1, x_2
 	Matrix<double, 3, 2> dxMatrix;
@@ -45,6 +46,8 @@ WuvMatrix wuvMatrix(Cloth &cloth, int i, int j, int k, bool isBl) {
 	}
 }
 
+// stretch force x direction
+// equation 10
 double scaleXCondition(Cloth &cloth, int *tri, bool isBl, double b) {
 	double area = cloth.triUvArea;
 	auto wm = wuvMatrix(cloth, tri[0], tri[1], tri[2], isBl);
@@ -53,6 +56,8 @@ double scaleXCondition(Cloth &cloth, int *tri, bool isBl, double b) {
 	return area * (wm.col(0).norm() - b);
 }
 
+// stretch force y direction
+// equation 10
 double scaleYCondition(Cloth &cloth, int *tri, bool isBl, double b) {
 	double area = cloth.triUvArea;
 	auto wm = wuvMatrix(cloth, tri[0], tri[1], tri[2], isBl);
@@ -112,9 +117,11 @@ double shearCondition(Cloth &cloth, int *tri, bool isBl) {
 }
 
 double shearCondition(Cloth &cloth, int i, int j, int k, bool isBl) {
-	auto wuvm = wuvMatrix(cloth, i, j, k, isBl);
+	//  a 3 x 2 matrix where the first column is Wu(x) and the second column is Wv(x)
+	Matrix<double, 3, 2> wuvm = wuvMatrix(cloth, i, j, k, isBl);
 	auto area = cloth.triUvArea;
 
+	// C(x) = a *wu (x)^T * wv (x)
 	return area * wuvm.col(0).dot(wuvm.col(1));
 }
 
@@ -122,16 +129,15 @@ RowVector3d shearPartial(Cloth &cloth, int pt, int *tri, bool isBl) {
 	return shearPartial(cloth, pt, tri[0], tri[1], tri[2], isBl);
 }
 
-// partial derivative, ya dummy
-// - Arne, 2021
+// approximate first derivative 
 RowVector3d shearPartial(Cloth &cloth, int pt, int i, int j, int k,
                          bool isBl) {
 	RowVector3d partial;
 
-	double localCond = shearCondition(cloth, i, j, k, isBl);
+	// double localCond = shearCondition(cloth, i, j, k, isBl);
 	double *worldPt = cloth.getWorldPoint(pt);
 
-	// forward intergration, maybe runge kutta
+	// approximation of first derivative (f(x - lambda) + f(x + lambda)) / 2 for each of the axis individually
 	for (int col = 0; col < 3; col++) {
 		// perturb the cloth
 		worldPt[col] += PERTURB_QUANT;
@@ -139,7 +145,9 @@ RowVector3d shearPartial(Cloth &cloth, int pt, int i, int j, int k,
 		double pCond1 = shearCondition(cloth, i, j, k, isBl);
 		worldPt[col] -= 2 * PERTURB_QUANT;
 		double pCond2 = shearCondition(cloth, i, j, k, isBl);
+		// symmetric difference quotient
 		partial[col] = (pCond1 - pCond2) / (2 * PERTURB_QUANT);
+
 
 		// de-perturb cloth
 		worldPt[col] += PERTURB_QUANT;
