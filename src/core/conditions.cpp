@@ -122,6 +122,8 @@ RowVector3d shearPartial(Cloth &cloth, int pt, int *tri, bool isBl) {
 	return shearPartial(cloth, pt, tri[0], tri[1], tri[2], isBl);
 }
 
+// partial derivative, ya dummy
+// - Arne, 2021
 RowVector3d shearPartial(Cloth &cloth, int pt, int i, int j, int k,
                          bool isBl) {
 	RowVector3d partial;
@@ -129,6 +131,7 @@ RowVector3d shearPartial(Cloth &cloth, int pt, int i, int j, int k,
 	double localCond = shearCondition(cloth, i, j, k, isBl);
 	double *worldPt = cloth.getWorldPoint(pt);
 
+	// forward intergration, maybe runge kutta
 	for (int col = 0; col < 3; col++) {
 		// perturb the cloth
 		worldPt[col] += PERTURB_QUANT;

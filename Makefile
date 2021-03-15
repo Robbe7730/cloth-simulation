@@ -1,7 +1,7 @@
 # Platform identifier
 MACHINE = $(shell uname -s)
 # Our source, so we can include relative to src/
-INCLUDES = -Isrc/ -I/usr/local/Cellar/eigen/3.3.2/include/eigen3/ -I/usr/local/Cellar/freeglut/3.0.0/include/ -I/usr/local/Cellar/glew/2.0.0/include/
+INCLUDES = -Isrc/ -I/usr/include/eigen3/ -I/usr/include/freeglut/ -I/usr/include/glew/
 # Directories inside src that we should look in for compilation
 DIRS = 
 # Object files, by keeping the directory structure from src/ in obj/

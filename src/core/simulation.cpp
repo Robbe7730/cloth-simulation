@@ -116,6 +116,7 @@ void Simulation::reset() {
 	cuffScale = 1;
 }
 
+// 4.2
 void Simulation::handleScaleCondition(int offset) {
 	int botLeftTri[3]  = {offset, offset + 1, offset + cloth.xRes};
 	int topRightTri[3] = {offset + cloth.xRes, offset + 1,
@@ -145,8 +146,8 @@ void Simulation::scaleHelper(int *triPts, bool isBl, int y) {
 			stretchX = 0.5;
 	}
 
-	auto condX = scaleXCondition(cloth, triPts, isBl, stretchX);
-	auto condY = scaleYCondition(cloth, triPts, isBl, stretchY);
+	auto condX = scaleXCondition(cloth, triPts, isBl, stretchX); // Wu(x)?
+	auto condY = scaleYCondition(cloth, triPts, isBl, stretchY); // Wv(x)?
 	for (int i = 0; i < 3; i++) {
 		int ptI = triPts[i];
 
@@ -154,8 +155,8 @@ void Simulation::scaleHelper(int *triPts, bool isBl, int y) {
 		auto partialIX = scaleXPartial(cloth, ptI, triPts, isBl, stretchX);
 		auto partialIY = scaleYPartial(cloth, ptI, triPts, isBl, stretchY);
 		Vector3d force = -SCALE_STIFF * (partialIX.transpose() * condX +
-		                                 partialIY.transpose() * condY);
-		for (int j; j < 3; j++) {
+		                                 partialIY.transpose() * condY); // C(X)
+		for (int j = 0; j < 3; j++) {
 			if (force[j] >  maxScale) force[j] =  maxScale;
 			if (force[j] < -maxScale) force[j] = -maxScale;
 		}
@@ -165,8 +166,9 @@ void Simulation::scaleHelper(int *triPts, bool isBl, int y) {
 		auto velI = Vector3d(cloth.getWorldVel(ptI));
 		Vector3d dampForce = -DAMP_STIFF *
 		                 (partialIX.transpose() * partialIX +
-		                  partialIY.transpose() * partialIY) * velI;
-		for (int j; j < 3; j++) {
+		                  partialIY.transpose() * partialIY) * velI; // eq 11
+		for (int j = 0; j < 3; j++) {
+			// If the dampening force is too big, make them cancel out
 			if (abs(dampForce[j]) > abs(velI[j] + force[j]))
 				dampForce[j] = -(velI[j] + force[j]);
 		}
