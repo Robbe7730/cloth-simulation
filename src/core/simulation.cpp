@@ -31,8 +31,8 @@ void Simulation::update() {
 	for (int i = 0; i < cloth.xRes * cloth.yRes; i++) {
 		// update velocities by condition-forces
 		for (int j = 0; j < 3; j++) {
-			cloth.worldVels[i*3 + j] += forces(0, i)[j] *
-			                            cloth.massPerVertI;
+			// instead of solving equation 6, a forward euler appreach is used
+			cloth.worldVels[i*3 + j] += forces(0, i)[j] * cloth.massPerVertI;
 		}
 
 		// apply gravitic acceleration
